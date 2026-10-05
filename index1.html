@@ -1,0 +1,931 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>#3 Lulu the Lioness: Animal Behavior Investigation</title>
+<style>
+:root{
+  --paper:#f3f5ef; --card:#ffffff; --ink:#14232a; --muted:#52646b; --line:#cfd8cc;
+  --tag:#e8590c; --tag-dk:#b8430a; --water:#1c6e8c; --water-bg:#e3f1f6;
+  --ok:#216b3f; --ok-bg:#e2f3e8; --bad:#9c2b23; --bad-bg:#fbe7e4; --hint:#6b4e00; --hint-bg:#fff3cc;
+  --male:#2c3e47; --female:#d99a3c; --cub:#f2d28f;
+  --head:Rockwell,"Roboto Slab","Rockwell Nova",Georgia,serif;
+  --body:system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;
+  --mono:"Courier New",ui-monospace,Menlo,monospace;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--paper);color:var(--ink);font:17px/1.55 var(--body)}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+:focus-visible{outline:3px solid var(--water);outline-offset:2px}
+h1,h2,h3{font-family:var(--head);line-height:1.2;margin:0 0 .5em}
+h1{font-size:clamp(1.9rem,4.5vw,2.8rem)}
+h2{font-size:1.7rem}
+h3{font-size:1.25rem}
+p{margin:.5em 0}
+a{color:var(--water)}
+header.top{background:var(--ink);color:#fff;padding:22px 20px 0}
+.top .wrap{max-width:1040px;margin:0 auto}
+.top h1{margin-bottom:.15em}
+.top p{color:#c8d6da;margin:0 0 14px;max-width:62ch}
+.badge{display:inline-block;background:#fff;color:var(--ink);border-radius:4px;padding:3px 10px;font-size:.88rem;margin:0 8px 8px 0;border-left:6px solid var(--tag)}
+nav.tabs{display:flex;flex-wrap:wrap;gap:4px;margin-top:10px}
+nav.tabs button{font:inherit;font-size:.95rem;border:0;background:#26373e;color:#dbe6e9;padding:10px 14px;border-radius:8px 8px 0 0;cursor:pointer}
+nav.tabs button[aria-selected=true]{background:var(--paper);color:var(--ink);font-weight:700}
+nav.tabs .cnt{display:inline-block;margin-left:6px;font-size:.78rem;background:rgba(255,255,255,.18);border-radius:10px;padding:0 7px}
+nav.tabs button[aria-selected=true] .cnt{background:#dfe6dc}
+nav.tabs .cnt.full{background:var(--ok);color:#fff}
+main{max-width:1040px;margin:0 auto;padding:22px 16px 60px}
+section.pane[hidden]{display:none}
+.card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:18px 20px;margin:0 0 18px}
+.card.note{border-left:6px solid var(--water);background:var(--water-bg)}
+.card.warn{border-left:6px solid var(--tag);background:#fff4ec}
+.lead{font-size:1.08rem}
+.q{border-top:1px solid var(--line);padding:14px 0 6px}
+.q:first-of-type{border-top:0}
+.qh{display:flex;gap:10px;align-items:flex-start}
+.qn{flex:none;font-family:var(--head);font-weight:700;background:var(--ink);color:#fff;border-radius:6px;min-width:2rem;padding:1px 8px;text-align:center}
+.qp{margin:0 0 8px;font-weight:600}
+textarea,input[type=text],input[type=number],select{width:100%;font:inherit;font-size:1rem;padding:9px 11px;border:1.5px solid #9fb0a8;border-radius:7px;background:#fff;color:var(--ink)}
+textarea{resize:vertical;min-height:90px}
+input.src{margin-top:6px}
+.btn{font:inherit;font-size:.98rem;background:var(--ink);color:#fff;border:0;border-radius:7px;padding:9px 16px;cursor:pointer}
+.btn:hover{background:#243b45}
+.btn.alt{background:#fff;color:var(--ink);border:1.5px solid var(--ink)}
+.btn.tag{background:var(--tag);color:#fff}
+.btn.tag:hover{background:var(--tag-dk)}
+.btn.small{padding:6px 12px;font-size:.9rem}
+.btn[disabled]{opacity:.45;cursor:not-allowed}
+.row{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin:8px 0}
+.note-s{font-size:.88rem;color:var(--muted)}
+.fb{margin-top:6px}
+.fbbox{border-radius:7px;padding:9px 12px;margin:6px 0;font-size:.97rem}
+.fbbox.ok{background:var(--ok-bg);color:var(--ok);border-left:5px solid var(--ok)}
+.fbbox.bad{background:var(--bad-bg);color:var(--bad);border-left:5px solid var(--bad)}
+.fbbox.hint{background:var(--hint-bg);color:var(--hint);border-left:5px solid #c59a14}
+.fbbox ul{margin:.2em 0 0;padding-left:1.2em}
+.opt{display:flex;gap:9px;align-items:flex-start;padding:7px 10px;border:1.5px solid var(--line);border-radius:8px;margin:6px 0;cursor:pointer;background:#fff}
+.opt:hover{border-color:var(--water)}
+.opt input{margin-top:.35em;flex:none}
+.quick{background:#f7faf5;border:1px dashed #98ab9f;border-radius:9px;padding:10px 14px;margin:0 0 10px}
+.quick .qp{font-weight:600}
+table.dt{border-collapse:collapse;width:100%;font-size:.95rem;background:#fff}
+table.dt th,table.dt td{border:1px solid var(--line);padding:6px 9px;text-align:center}
+table.dt thead th{background:#e4ebe0}
+table.dt th[scope=row]{text-align:left;background:#f1f5ee}
+.tblwrap{overflow-x:auto;margin:8px 0}
+tr.okrow td,tr.okrow th{background:var(--ok-bg)!important}
+tr.badrow td,tr.badrow th{background:var(--bad-bg)!important}
+tr.why td{text-align:left;font-size:.92rem;background:#fafafa}
+td.choice{text-align:left;white-space:nowrap}
+td.choice label{margin-right:12px;cursor:pointer}
+.al.m{background:#ffe08a;border-radius:3px;padding:0 3px;font-weight:700}
+.chip{font:inherit;border:1.5px solid var(--ink);background:#fff;color:var(--ink);border-radius:18px;padding:4px 14px;cursor:pointer;margin:2px 4px 2px 0}
+.chip[aria-pressed=true]{background:var(--water);border-color:var(--water);color:#fff;font-weight:700}
+.cubtabs{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 12px}
+.cubtabs button{font:inherit;border:1.5px solid var(--ink);background:#fff;border-radius:8px;padding:6px 14px;cursor:pointer}
+.cubtabs button[aria-selected=true]{background:var(--ink);color:#fff}
+.cubtabs button.done::after{content:" ✓"}
+.step{border-left:5px solid var(--water);padding:2px 0 2px 14px;margin:16px 0}
+.step.locked{border-color:#c4cdc7;color:var(--muted)}
+.final{font-weight:700;color:var(--ok)}
+/* tracker */
+.mapwrap{background:#fff;border:1px solid var(--line);border-radius:10px;padding:8px}
+svg.map{width:100%;height:auto;display:block;background-image:linear-gradient(#e6ece3 1px,transparent 1px),linear-gradient(90deg,#e6ece3 1px,transparent 1px);background-size:20px 20px}
+.zone{fill:rgba(255,255,255,.75);stroke:#5f7a6c;stroke-width:2}
+.zone.u{stroke-dasharray:7 5;stroke:#8a8f8c}
+.zlabel{font:700 17px var(--head);fill:var(--ink)}
+.zsub{font:13px var(--body);fill:var(--muted)}
+.tok{opacity:0;transition:transform .8s ease,opacity .5s ease}
+.tok.on{opacity:1}
+.tok circle.body{stroke-width:3}
+.tok.assumed circle.body{stroke-dasharray:4 3}
+.tok.assumed{opacity:.6}
+.tok text.num{font:700 14px var(--body);text-anchor:middle;dominant-baseline:central}
+.tok text.sx{font:12px var(--body);text-anchor:middle;fill:var(--ink)}
+.tok text.lulu{font:700 12px var(--body);text-anchor:middle;fill:var(--tag-dk)}
+.fieldnotes{font-family:var(--mono);font-size:.95rem;background:#fffdf3;border:1px solid #e3dcb8;border-radius:8px;padding:10px 14px}
+.fieldnotes h4{margin:.1em 0 .4em;font:700 1rem var(--mono)}
+.fieldnotes ul{margin:.2em 0;padding-left:1.1em}
+.legend{display:flex;flex-wrap:wrap;gap:14px;font-size:.88rem;color:var(--muted);margin:8px 0}
+.legend span::before{content:"";display:inline-block;width:14px;height:14px;border-radius:50%;margin-right:5px;vertical-align:-2px;border:3px solid var(--male);background:#fff}
+.legend .f::before{border-color:var(--female);background:var(--female)}
+.legend .m::before{background:var(--male)}
+.legend .c::before{border-color:var(--cub);background:var(--cub);width:10px;height:10px}
+.legend .a::before{border-style:dashed;background:#fff}
+.wherelist{font-size:.92rem;color:var(--muted);margin:6px 0}
+/* karyotype */
+.pool{display:grid;grid-template-columns:repeat(auto-fill,minmax(58px,1fr));gap:6px;margin:10px 0}
+.tile{background:#fff;border:1.5px solid var(--line);border-radius:8px;padding:0;cursor:pointer;height:116px}
+.tile[aria-pressed=true]{border-color:var(--tag);box-shadow:0 0 0 3px #ffd7bf}
+.tile:hover{border-color:var(--water)}
+.kt{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0}
+.kp{background:#fff;border:1px solid var(--line);border-radius:8px;text-align:center;padding:2px 4px;font-size:.8rem}
+.kp svg{display:block;margin:auto}
+/* hunt */
+.bars{display:grid;grid-template-columns:3.2rem 1fr 5.2rem;gap:4px 8px;align-items:center;font-size:.9rem}
+.bar{height:16px;background:var(--water);border-radius:3px}
+.bar.g{background:var(--female)}
+/* misc */
+details.card summary{cursor:pointer;font-weight:700;font-family:var(--head);font-size:1.1rem}
+dl.gl dt{font-weight:700;margin-top:.6em}
+dl.gl dd{margin:0 0 0 1em}
+.pill{display:inline-block;border-radius:12px;padding:1px 10px;font-size:.85rem}
+.pill.ok{background:var(--ok-bg);color:var(--ok)}
+.pill.warn{background:var(--hint-bg);color:var(--hint)}
+.pill.bad{background:var(--bad-bg);color:var(--bad)}
+#printArea{display:none}
+@media (prefers-reduced-motion:reduce){.tok{transition:none}html{scroll-behavior:auto}}
+@media print{
+  body *{visibility:hidden}
+  #printArea,#printArea *{visibility:visible}
+  #printArea{display:block;position:absolute;left:0;top:0;width:100%;font:12pt/1.4 var(--body)}
+  #printArea pre{white-space:pre-wrap;font:11pt/1.4 var(--body)}
+}
+</style>
+</head>
+<body>
+<noscript><p style="padding:20px">This investigation needs JavaScript turned on in your browser.</p></noscript>
+
+<header class="top">
+  <div class="wrap">
+    <h1>#3 Lulu the Lioness</h1>
+    <p>Animal Behavior Investigation. Read the field notes, test the DNA, and work out who the cubs' parents are.</p>
+    <span class="badge">AI usage: Red (Level 0). This page contains no AI.</span>
+    <span class="badge">Your work stays on this device until you copy, download, or print it.</span>
+    <nav class="tabs" role="tablist" aria-label="Investigation steps" id="tabs"></nav>
+  </div>
+</header>
+
+<main id="main">
+
+<!-- START -->
+<section class="pane" id="p-start" role="tabpanel">
+  <div class="card">
+    <h2>Driving questions</h2>
+    <p class="lead">1. Who are the parents of lion cubs 709, 710, 711, 712, and 713?</p>
+    <p class="lead">2. Why do lions live in social groups?</p>
+  </div>
+  <div class="card">
+    <h2>Before you begin</h2>
+    <p>Over the next couple of days you will investigate why lions live in groups, or prides. You will work through four data sets, discuss your findings with your team, and answer the driving questions in a Final Report.</p>
+    <p>In this version you do more than read. You will move through the field notes day by day, sort chromosomes into a karyotype, run a hunting experiment, and test possible parents against the DNA. In most places you make a prediction or calculation first, then check it.</p>
+    <p><strong>Your voice and opinions matter.</strong> The loudest person isn't always the one with the best answers. Talk with your team, then write your <strong>own</strong> answers.</p>
+    <div class="row">
+      <div style="flex:2;min-width:200px"><label for="in-name">Name</label><input type="text" id="in-name" autocomplete="off"></div>
+      <div style="flex:1;min-width:100px"><label for="in-hour">Hour</label><input type="text" id="in-hour" autocomplete="off"></div>
+      <div style="flex:1;min-width:100px"><label for="in-group">Group #</label><input type="text" id="in-group" autocomplete="off"></div>
+    </div>
+    <div class="row">
+      <a class="btn tag" style="text-decoration:none" href="https://vimeo.com/456643002/d385666b2f" target="_blank" rel="noopener">Watch the video: Kali's Secret (opens in a new tab)</a>
+      <button class="btn" data-nav="ds1">Start Data Set 1</button>
+    </div>
+    <p class="note-s">If you can't open the video, ask your teacher for another way to watch it.</p>
+  </div>
+  <div class="card warn">
+    <strong>How the hints work.</strong> Feedback on calculations (karyotype pairing and the DNA lab) is worked out from the actual data, so it is exact. The "Check my thinking" buttons on written answers only look for key ideas by matching words. They cannot tell you whether your answer is right, and they don't give a grade. Your teacher reads your work.
+  </div>
+  <details class="card"><summary>Glossary</summary>
+    <dl class="gl">
+      <dt>Pride</dt><dd>A social group of lions: related females, their cubs, and a few adult males.</dd>
+      <dt>Patriarch</dt><dd>An adult male that holds the pride and defends it.</dd>
+      <dt>Chromosome</dt><dd>A long strand of DNA that carries many genes. Lions have 38.</dd>
+      <dt>Karyotype</dt><dd>An organized picture of an individual's chromosomes, arranged in matching pairs.</dd>
+      <dt>Gene and locus</dt><dd>A gene is a section of DNA that affects a trait. A locus (plural: loci) is the spot on a chromosome where a gene sits. Here the loci are FCA26, FCA45, FCA77, and FCA96.</dd>
+      <dt>Allele</dt><dd>One version of a gene. Here they are written as letters.</dd>
+      <dt>Genotype</dt><dd>The two alleles an individual has at a locus. You get one allele from each parent.</dd>
+      <dt>Parentage</dt><dd>Who an individual's biological parents are.</dd>
+    </dl>
+  </details>
+  <details class="card"><summary>Standards and practices</summary>
+    <p><strong>Science and Engineering Practices:</strong> SEP 4 Analyzing and Interpreting Data; SEP 5 Using Mathematics and Computational Thinking.<br>
+    <strong>NGSS:</strong> LS 2-8 Ecosystems: Interactions, Energy, and Dynamics; LS 3-2 Heredity: Inheritance and Variation of Traits.<br>
+    <strong>Crosscutting Concepts:</strong> Patterns; Cause and Effect.</p>
+  </details>
+  <p><button class="btn alt small" id="btn-reset">Erase my answers and start over</button></p>
+</section>
+
+<!-- DS1 -->
+<section class="pane" id="p-ds1" role="tabpanel" hidden></section>
+<section class="pane" id="p-ds2" role="tabpanel" hidden></section>
+<section class="pane" id="p-ds3" role="tabpanel" hidden></section>
+<section class="pane" id="p-ds4" role="tabpanel" hidden></section>
+<section class="pane" id="p-final" role="tabpanel" hidden></section>
+<section class="pane" id="p-submit" role="tabpanel" hidden></section>
+</main>
+<div id="printArea" aria-hidden="true"></div>
+
+<script>
+(function(){
+'use strict';
+/* ---------- helpers ---------- */
+const $=(s,r)=>(r||document).querySelector(s);
+const $$=(s,r)=>Array.from((r||document).querySelectorAll(s));
+const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const uniq=a=>Array.from(new Set(a));
+const STORE='lulu_sim_v1';
+const fresh=()=>({info:{name:'',hour:'',group:''},ans:{},ch:{},src:{},q4m:[],q4f:[],ui:{tab:'start',cub:'709',hl:false,ev:0},lab:{},karyo:{order:null,paired:[],sel:null,msg:''},hunt:{pred:'',log:[],prey:'springbok',n:3}});
+let S=fresh();
+try{const raw=localStorage.getItem(STORE); if(raw){const o=JSON.parse(raw); S=Object.assign(fresh(),o);}}catch(e){}
+let saveT=null;
+function save(){clearTimeout(saveT);saveT=setTimeout(()=>{try{localStorage.setItem(STORE,JSON.stringify(S));}catch(e){}},250);}
+
+/* ---------- prompts (the teacher's wording) ---------- */
+const P={
+ 'ds1.q1':'Male 633 seems to be the dominant male of the Reitfontein pride in March 1992 and it is likely that he is the father of any cubs in the pride. What likely happened to him by June 12th and why? Think about \u2018who\u2019 had since joined the pride.',
+ 'ds1.q2':'By June 12th 1992, Lulu and 4 cubs had gone missing but were found June 15th in a neighboring pride. Think about the video you saw about a different lioness and explain why you think Lulu and the cubs left and who the parents of the cubs may be.',
+ 'ds1.q3':'By March 15th 1993, Lulu is back in her original pride, but the cubs she left with (709, 710, 711, & 712) are not with her. Why do you think Lulu returned and why do you think the cubs stayed in their new pride?',
+ 'ds1.q4':'Scientists observed a new cub, 713, on March 15th 1993. Who could be the possible parents of this cub?',
+ 'ds1.q5':'By March 30th, cub 709 was missing and presumed to have gone to another pride. Why do you think this cub may have left?',
+ 'ds1.q6':'Do you have enough information to determine without a doubt who the parents of all the cubs are?',
+ 'ds1.q7':'What other scientific evidence did the scientists take during this time that could be crucial to determining who the parents of the cubs are?',
+ 'ds2.q1':'What is this species\u2019 scientific name?',
+ 'ds2.q2m':'Briefly describe what roles the males and females play in the pride. Males:',
+ 'ds2.q2f':'Briefly describe what roles the males and females play in the pride. Females:',
+ 'ds2.q3':'What role do lions fill in their habitat?',
+ 'ds2.q4':'Why is the role of the lion in their habitat critical to maintain a healthy community?',
+ 'ds2.q5':'Which sex is mainly responsible for the role researched in #3?',
+ 'ds2.q6':'Who is responsible for controlling the pride\u2019s territory?',
+ 'ds2.q7m':'If the pride is taken over by new individuals, what most likely happens to the males?',
+ 'ds2.q7f':'If the pride is taken over by new individuals, what most likely happens to the females?',
+ 'ds2.q7c':'If the pride is taken over by new individuals, what most likely happens to the cubs?',
+ 'ds2.q8':'How are cubs raised within the pride; who has this responsibility?',
+ 'ds2.q9':'How do the roles filled by females increase the survival of the species?',
+ 'ds2.q10':'How do the roles filled by the males increase the survival of the species?',
+ 'ds2.q11':'Explain how exhibiting group behavior like these lions do, increases the survival of individuals within the species.',
+ 'ds2.hunt':'Pride Challenge: Using your data table and the long-run averages, for which prey size did a bigger group help the most? Did it help for every prey size, and in every way (success rate, meat per lion, risk of going hungry)? (Add this to your thinking for question 11.)',
+ 'ds3.q1a':'How many chromosomes does each karyotype contain?',
+ 'ds3.q2':'How are the chromosomes arranged in the karyotypes?',
+ 'ds3.q3':'Does the arrangement of chromosomes have any significance regarding where each chromosome came from?',
+ 'ds4.q1':'Why does each lion have two alleles for each gene?',
+ 'ds4.q2':'Can this data alone be used to be able to determine both parents of the cubs? What is your reasoning?',
+ 'fr.q1':'What line of evidence/data was most important in determining parentage of the lion cubs?',
+ 'fr.q2':'Which cub(s) was Lulu (#630) the biological mother of? How could you tell using the data provided?',
+ 'fr.q3a':'Was Lulu related to any of the cubs that were not her own? If so, which ones, how was she related, and how does the data support this? Cubs she is related to that are not her own:',
+ 'fr.q3b':'How she was related to them:',
+ 'fr.q3c':'Evidence from Data Set 4 which supports this:',
+ 'fr.q4':'The main purpose of living things is to live long enough to reproduce and pass on their genes. If Lulu was not the mother of all the cubs, why did she take them to another pride? How does this benefit her personally?',
+ 'fr.q5':'Based on all your experience so far in this Lion unit, how is it advantageous for some species like lions to live in a social group?'
+};
+/* keyword hints: [what to think about, regex, message when found] */
+const IDEAS={
+ 'ds1.q1':[['Who joined the pride between March and June?',/631|695|new male|two males|newcomer|took ?over|takeover|replac/i,'You used the clue about the new males.'],['What do the notes say about 633\u2019s condition in March?',/old|limp|weak|age|aging|injur/i,'You connected his condition to what happened.'],['What do new males do to the male they replace?',/driv|chas|kill|fight|forc|expel|push|evict|overthr|lost/i,'You described what happened to him.']],
+ 'ds1.q2':[['Why would new males be a danger to cubs they did not father?',/kill|infantic|murder|danger|threat/i,'You explained the danger to the cubs.'],['Who might the cubs\u2019 father be, based on the notes?',/633|father|dad|dominant|patriarch/i,'You named a likely father.'],['What did the notes say about 630 and the cubs?',/630|lulu|mother|mom/i,'You mentioned Lulu as presumed mother.']],
+ 'ds1.q3':[['What might have changed for Lulu by March 1993?',/safe|settle|new males|accept|mate|breed|rejoin|sister|family|home|territory|628/i,'You gave a reason for Lulu returning.'],['Why would the cubs be safer staying away?',/kill|danger|threat|safe|not (their|the) father|new males|631|695|care|looked after|adopt/i,'You gave a reason the cubs stayed.']],
+ 'ds1.q4':[['Which males were around when 713 would have been conceived?',/631|695|new male/i,'You used the new males.'],['Which females could be the mother?',/628|630|664|670|687|female|lulu/i,'You named possible mothers.']],
+ 'ds1.q5':[['Think about what happens to young males as they grow up.',/male|grow|mature|old(er)?|adult|age/i,'You thought about his age and sex.'],['Why might a young male leave?',/compet|inbreed|related|relative|own pride|mate|dispers|nomad|kicked|driv|pushed|forced|leave/i,'You gave a reason for leaving.']],
+ 'ds1.q6':[['Say clearly whether the notes are enough, and why.',/\bno\b|not|can'?t|cannot|isn'?t|unsure|uncertain/i,'You gave a clear answer.'],['Which words in the notes show uncertainty?',/may|possib|presum|guess|assum|uncertain|observ|appear/i,'You pointed out the uncertainty.']],
+ 'ds1.q7':[['Name the evidence that was collected and what it can show.',/blood|sample|dna|genetic|gene|genotype/i,'You named the genetic evidence.']],
+ 'ds2.q1':[['Scientific names have two parts. Check the label on the karyotype in Data Set 3 too.',/panthera\s+leo/i,'Correct: Panthera leo.']],
+ 'ds2.q2m':[['What do males do for the pride?',/defend|protect|territor|guard|patrol|rival|mate|sire/i,'You described a male role.']],
+ 'ds2.q2f':[['What do females do for the pride?',/hunt|cub|raise|nurs|care|food|prey/i,'You described a female role.']],
+ 'ds2.q3':[['Where do lions sit in a food chain?',/predator|apex|top|keystone|carnivore/i,'You named their role as a predator.']],
+ 'ds2.q4':[['What happens to prey and plants without predators?',/prey|herbivor|population|graz|overgraz|balance|ecosystem|disease|weak|sick/i,'You explained the effect on the community.']],
+ 'ds2.q5':[['Name the sex clearly.',/female|lioness/i,'You named the sex.']],
+ 'ds2.q6':[['Name who controls the territory.',/male|patriarch|coalition/i,'You named who defends the territory.']],
+ 'ds2.q7m':[['What happens to the old males?',/driv|chas|kill|expel|exile|nomad|leave|forc|evict|push/i,'You said what happens to them.']],
+ 'ds2.q7f':[['Do females stay, leave, or get hurt? There can be more than one outcome.',/stay|remain|leave|flee|mate|accept|kill|defend|join|driven/i,'You described what happens to females.']],
+ 'ds2.q7c':[['What do new males often do to cubs they did not father?',/kill|infantic|murder/i,'You described the threat to cubs.']],
+ 'ds2.q8':[['Who is responsible?',/female|lioness/i,'You named who raises cubs.'],['How do they share the work?',/communal|share|together|nurs|each other|cr[eè]che|group|babysit/i,'You described how they share care.']],
+ 'ds2.q9':[['Link female roles (hunting, raising cubs) to survival.',/hunt|food|cubs|raise|nurs|surviv|protect/i,'You linked female roles to survival.']],
+ 'ds2.q10':[['Link male roles (protecting, territory, mating) to survival.',/protect|defend|territor|mate|reproduc|safe|rival|guard|gene|cub/i,'You linked male roles to survival.']],
+ 'ds2.q11':[['Give a specific benefit to an individual lion.',/hunt|prey|food|protect|defend|cub|territor|share|safe|surviv/i,'You named a benefit.'],['Use evidence from your research or the Pride Challenge.',/challenge|data|kill|success|giraffe|zebra|large|big prey|bigger|table/i,'You used evidence.']],
+ 'ds2.hunt':[['Compare small prey to large prey.',/small|springbok|large|giraffe|big|zebra|medium/i,'You compared prey sizes.'],['Use numbers from your table.',/\d/,'You used numbers.']],
+ 'ds3.q2':[['How are they grouped?',/pair|match|homolog|couple/i,'You mentioned pairs.'],['What features line them up?',/size|length|band|stripe|pattern|shape|centromere|large|small/i,'You named features used to match them.']],
+ 'ds3.q3':[['Where did each chromosome in a pair come from?',/mother|father|mom|dad|parent|each/i,'You connected pairs to parents.'],['Can you tell which one came from which parent?',/can'?t|cannot|\bnot\b|\bno\b|doesn'?t|isn'?t|unable/i,'You said whether the picture shows it.']],
+ 'ds4.q1':[['Where do the two alleles come from?',/mother|father|mom|dad|parent|both|each/i,'You named the parents.'],['How many alleles does each parent give?',/\bone\b|\b1\b|half/i,'You said how many each parent gives.']],
+ 'ds4.q2':[['What do you know about each cub\u2019s alleles, and what don\u2019t you know?',/which|who|came from|alphabet|order|can'?t tell|don'?t know/i,'You noted what the data can\u2019t tell you.'],['What else would you need?',/parent|adult|female|male|genotype|compare|data ?set 2|#2/i,'You said what to compare against.']],
+ 'fr.q1':[['Name the line of evidence.',/genotype|dna|allele|genetic|blood/i,'You named the genetic evidence.'],['Why was it more reliable than the field notes?',/field|notes|observ|guess|certain|proof|accurate|hard|confus|contradict|reliable|definit|sure/i,'You compared it to observations.']],
+ 'fr.q2':[['Name the cub number(s).',/711/,'You named a cub.'],['Use specific alleles or loci from Data Set 4 as proof.',/B ?\/ ?B|fca|allele|locus|loci|E ?\/ ?H|genotype/i,'You cited DNA data.']],
+ 'fr.q3a':[['List cub numbers.',/709|710|712|713/,'You listed cubs.']],
+ 'fr.q3b':[['Name the relationship (for example sister, aunt, niece, nephew).',/aunt|sister|niece|nephew|cousin|half|sibling|relative|kin/i,'You named a relationship.']],
+ 'fr.q3c':[['Cite alleles that are shared in Data Set 4.',/allele|fca|share|same|both|B ?\/|M ?\/ ?N|match/i,'You cited shared alleles.']],
+ 'fr.q4':[['Connect the cubs to Lulu\u2019s genes: relatives share genes.',/gene|related|relative|kin|aunt|share|blood|dna/i,'You connected the cubs to her genes.'],['What danger might the cubs have faced?',/kill|infantic|new males|danger|threat|protect|safe/i,'You named a danger.'],['How does saving them help Lulu personally?',/pass|surviv|her own|711|indirect|fitness|reproduc|offspring/i,'You said how it helps her.']],
+ 'fr.q5':[['Name a benefit (hunting, protection, shared cub care, territory).',/hunt|protect|defend|cub|territor|share|safe|large prey|food/i,'You named a benefit.'],['Explain how it helps survival or reproduction.',/surviv|reproduc|offspring|pass|live longer/i,'You linked it to survival.']]
+};
+/* quick picks: instant feedback on a first guess */
+const CHOICES={
+ 'ds1.c1':{p:'Quick pick: what do you think happened to 633?',o:[
+  {t:'The new males, 631 and 695, took over the pride and drove 633 out (or killed him).',ok:1,f:'Good thinking. Two new males appear just as 633 vanishes, and 633 was old and possibly limping. Now explain your reasoning in your own words below.'},
+  {t:'633 died of old age.',f:'That is possible since he was the oldest. But it ignores a big clue: two new males showed up at the same time he disappeared. What might they have done?'},
+  {t:'633 wandered off to hunt and will be back.',f:'Check the dates. He is missing and two new males are already in charge. A healthy dominant male doesn\u2019t usually walk away from his pride.'}]},
+ 'ds1.c2':{p:'Quick pick: why might Lulu have left with the cubs?',o:[
+  {t:'New males often kill cubs they did not father, so she fled to keep the cubs safe.',ok:1,f:'Yes, that is the idea from the video. Explain it using the dates and lion numbers in the notes.'},
+  {t:'Lulu was looking for better hunting grounds.',f:'Lions do move for food, but it is unusual to carry a whole set of young cubs across territory for that. Think about what threat the lioness in the video was hiding her cubs from.'},
+  {t:'The cubs\u2019 father forced them out.',f:'If 633 is the father, he was missing at the time. Who was in charge of the pride instead?'}]},
+ 'ds1.c6':{p:'Quick pick: is the field-note evidence enough?',o:[
+  {t:'Yes. The notes are enough to know who every parent is.',f:'Re-read the notes. Look at how many times they say \u201Cmay be\u201D, \u201Cpossibly\u201D, \u201Cpresumed\u201D. Watching lions can suggest relationships but can\u2019t prove them.'},
+  {t:'No. I need more evidence.',ok:1,f:'Right. Observations suggest relationships but can\u2019t prove them. Question 7 asks what other evidence was collected.'}]},
+ 'ds3.c3':{p:'Quick pick: look at one matched pair in a karyotype. Can you tell which chromosome came from the mother and which from the father?',o:[
+  {t:'Yes. The larger one in each pair is from the mother.',f:'Not so. The two chromosomes in a pair look alike, and size doesn\u2019t tell parent.'},
+  {t:'No. One of each pair came from each parent, but they look alike.',ok:1,f:'Correct. The karyotype is arranged by matching size and banding, not by which parent gave which chromosome. Remember this for Data Set 4.'},
+  {t:'Yes. The left one in each pair is always from the father.',f:'Not so. Left and right are just how the pair was arranged in the picture.'}]},
+ 'ds4.c1':{p:'Quick pick: why does each lion have two alleles for each gene?',o:[
+  {t:'One allele came from each parent.',ok:1,f:'Correct. Each parent gives one chromosome of each pair, so each lion has two alleles per gene.'},
+  {t:'Each lion gets two alleles from its mother.',f:'Not quite. Each parent contributes one. A cub gets half its DNA from each parent.'},
+  {t:'The second allele is a spare copy in case the first one breaks.',f:'Not quite. The two alleles can be the same or different, and they come from different parents.'}]},
+ 'ds4.c2':{p:'Quick pick: can the cubs\u2019 genotypes alone tell us both parents?',o:[
+  {t:'Yes. Each cub\u2019s alleles tell us exactly who the parents are.',f:'Think about it: a cub\u2019s genotype shows two alleles, but not whose they are. What else do you need to compare it to?'},
+  {t:'No. I also need the possible parents\u2019 genotypes to compare.',ok:1,f:'Right. The cub\u2019s alleles must each match one parent. You can only tell which adults fit by comparing to their genotypes (Genotype Data #2).'}]}
+};
+
+/* ---------- field notes data ---------- */
+const ORDER=['633','631','695','628','630','664','670','687','709','710','711','712','713'];
+const LION={'633':'M','631':'M','695':'M','628':'F','630':'F','664':'F','670':'F','687':'F','709':'C','710':'C','711':'C','712':'C','713':'C'};
+const CUBSEX={'709':'\u2642','710':'\u2640','711':'\u2640','712':'\u2640'};
+const EV=[
+ {d:'March 20, 1992',w:'Reitfontein Pride, Namibia',pos:{'633':'R','628':'R','630':'R','664':'R','670':'R','687':'R'},sex:false,n:['Male 633 present along with females 628, 630, 664, 670, and 687.','Male 633 oldest animal in pride currently. Possibly limping?','Male 633 awake and moving ok.','Female 628 and 630 may be sisters as they appear to be the same age. Either of these two may be the mother of 664, 670, or 687.','Observed 664 and 670 which is a reminder that these females have been difficult to sample; unsuccessful attempts have been made.']},
+ {d:'June 12, 1992',w:'Reitfontein Pride, Namibia',pos:{'633':'U','631':'R','695':'R','630':'U','709':'U','710':'U','711':'U','712':'U','628':'R','664':'R','670':'R','687':'R'},sex:false,n:['Male 633 missing.','Two new males present, 631 and 695.','Female 630 missing.','Cubs 709, 710, 711, and 712 also missing, presumed dead?','Other females still present, mating observed between 631 and 628.']},
+ {d:'June 15, 1992',w:'Homob Pride, Namibia',pos:{'630':'H','709':'H','710':'H','711':'H','712':'H'},sex:false,n:['630 found in neighboring pride!','Cubs 709, 710, 711, and 712 all accounted for in new pride also. Sending blood samples from each to determine parentage.','Cubs were trapped and checked by field vet. Blood samples taken for genetic analysis to be performed later.','630 presumed mother, locals calling her Lulu.']},
+ {d:'August 1, 1992',w:'Homob Pride, Namibia',pos:{'630':'H','709':'H','710':'H','711':'H','712':'H'},sex:true,n:['630 still part of this pride. Cubs 709, 710, 711, and 712 all accounted for and doing well.','709 appears to be male and other siblings appear to be female.']},
+ {d:'March 15, 1993',w:'Reitfontein Pride, Namibia',pos:{'630':'R','631':'R','695':'R','713':'R'},sex:true,n:['630 seen back as part of this pride with new cubs. Cubs 709, 710, 711, and 712 not present.','631 and 695 still patriarchs of pride.','New cub 713 sighted. Samples taken.','Will work on pedigree with new genetics data that has just come back.']},
+ {d:'March 30, 1993',w:'Homob Pride, Namibia',pos:{'710':'H','711':'H','712':'H','709':'O'},sex:true,n:['710, 711, 712 present. 709 missing, presumably to another pride.']}
+];
+const ZONES={R:{x:20,y:16,t:'Reitfontein pride',s:'home pride'},H:{x:408,y:16,t:'Homob pride',s:'neighboring pride'},U:{x:20,y:288,t:'Missing or location unknown',s:''},O:{x:408,y:288,t:'Possibly another pride',s:''}};
+
+/* ---------- genetics data ---------- */
+const LOCI=['FCA26','FCA45','FCA77','FCA96'];
+const G={
+ F:{'628':['A/B','M/N','S/S','D/D'],'630':['B/B','M/N','S/U','E/H'],'687':['C/C','M/N','T/U','D/G']},
+ M:{'633':['B/C','N/O','S/T','D/E'],'631':['A/A','M/O','S/S','F/H'],'695':['B/C','N/O','T/T','D/F'],'668':['B/C','M/O','S/U','D/D'],'657':['C/C','M/M','S/T','H/G']},
+ C:{'709':['A/C','M/M','S/S','D/D'],'710':['A/B','M/N','S/U','D/D'],'711':['B/B','M/O','S/T','E/H'],'712':['C/C','M/O','S/U','E/G'],'713':['A/B','M/O','S/S','D/F']}
+};
+const CUBS=Object.keys(G.C), FEM=Object.keys(G.F), MAL=Object.keys(G.M);
+const al=(g,id,l)=>G[g][id][l].split('/');
+const fmt=s=>s.replace('/',' / ');
+function momFail(c,f){return LOCI.findIndex((_,l)=>!al('C',c,l).some(a=>al('F',f,l).includes(a)));}
+function mustDad(c,f,l){const x=al('C',c,l),m=al('F',f,l),out=[];if(m.includes(x[1]))out.push(x[0]);if(m.includes(x[0]))out.push(x[1]);return uniq(out);}
+function dadFail(c,f,d){return LOCI.findIndex((_,l)=>!mustDad(c,f,l).some(a=>al('M',d,l).includes(a)));}
+const TRUTH={};
+CUBS.forEach(c=>{const m=FEM.filter(f=>momFail(c,f)<0);const mom=m[0];const d=MAL.filter(x=>dadFail(c,mom,x)<0);TRUTH[c]={mother:mom,father:d[0],moms:m,dads:d};});
+
+/* ---------- tabs ---------- */
+const TABS=[['start','Start'],['ds1','Data Set 1: Field Notes'],['ds2','Data Set 2: Research'],['ds3','Data Set 3: Karyotypes'],['ds4','Data Set 4: Genotypes'],['final','Final Report'],['submit','Turn In']];
+function buildTabs(){
+  $('#tabs').innerHTML=TABS.map(t=>`<button role="tab" id="tab-${t[0]}" data-tab="${t[0]}" aria-selected="false" aria-controls="p-${t[0]}">${esc(t[1])}<span class="cnt" id="cnt-${t[0]}" hidden></span></button>`).join('');
+}
+function showTab(id){
+  S.ui.tab=id;
+  TABS.forEach(t=>{const on=t[0]===id;$('#p-'+t[0]).hidden=!on;$('#tab-'+t[0]).setAttribute('aria-selected',on);});
+  if(id==='final')renderFinalEvidence();
+  if(id==='submit')renderSubmitPreview();
+  save();window.scrollTo({top:0});
+}
+function filled(k){return (S.ans[k]||'').trim().length>0;}
+function progress(){
+  const ds1=['q1','q2','q3','q4','q5','q6','q7'].filter(q=>filled('ds1.'+q)).length;
+  const ds2=['q1','q2m','q2f','q3','q4','q5','q6','q7m','q7f','q7c','q8','q9','q10','q11'].filter(q=>filled('ds2.'+q)).length;
+  const ds3=(S.karyo.paired.length===19?1:0)+(filled('ds3.q2')?1:0)+(filled('ds3.q3')?1:0);
+  const ds4=CUBS.filter(c=>L(c).father).length;
+  const fr=['q1','q2','q3a','q3b','q3c','q4','q5'].filter(q=>filled('fr.'+q)).length;
+  const set=(id,n,t)=>{const e=$('#cnt-'+id);e.hidden=false;e.textContent=n+'/'+t;e.classList.toggle('full',n===t);};
+  set('ds1',ds1,7);set('ds2',ds2,14);set('ds3',ds3,3);set('ds4',ds4,5);set('final',fr,7);
+}
+
+/* ---------- reusable blocks ---------- */
+function qText(key,num,opts){
+  opts=opts||{};
+  return `<div class="q"><div class="qh"><span class="qn">${esc(num)}</span><p class="qp">${esc(opts.prompt||P[key])}</p></div>
+  <label class="sr" for="ta-${key}">Your answer to ${esc(num)}</label>
+  <textarea id="ta-${key}" data-k="${key}" rows="${opts.rows||4}" placeholder="${esc(opts.ph||'Type your own answer here.')}">${esc(S.ans[key]||'')}</textarea>
+  ${opts.src?`<label class="sr" for="src-${key}">Source for ${esc(num)}</label><input class="src" id="src-${key}" type="text" data-src="${key}" placeholder="Source: paste the web address (URL) of the page you used" value="${esc(S.src[key]||'')}"><div class="fb" id="srcfb-${key}"></div>`:''}
+  ${IDEAS[key]?`<div class="row"><button class="btn small alt" data-check="${key}">Check my thinking</button><span class="note-s">Looks for key ideas only. It can\u2019t grade you.</span></div><div class="fb" id="fb-${key}" aria-live="polite"></div>`:''}
+  </div>`;
+}
+function qChoice(key){
+  const c=CHOICES[key];const sel=S.ch[key];
+  return `<div class="quick"><p class="qp">${esc(c.p)}</p>${c.o.map((o,i)=>`<label class="opt"><input type="radio" name="${key}" data-ch="${key}" value="${i}" ${sel===i?'checked':''}><span>${esc(o.t)}</span></label>`).join('')}<div class="fb" id="cfb-${key}" aria-live="polite">${choiceFb(key)}</div></div>`;
+}
+function choiceFb(key){const s=S.ch[key];if(s===undefined)return '';const o=CHOICES[key].o[s];return `<div class="fbbox ${o.ok?'ok':'hint'}">${o.ok?'\u2713 ':'\u25CB '}${esc(o.f)}</div>`;}
+function runIdeas(key){
+  const txt=(S.ans[key]||'').trim();const fb=document.getElementById('fb-'+key);if(!fb)return;
+  if(txt.length<10){fb.innerHTML='<div class="fbbox hint">Write a first answer, then check it.</div>';return;}
+  const ideas=IDEAS[key];let got=0;
+  const li=ideas.map(i=>{const hit=i[1].test(txt);if(hit)got++;return `<li>${hit?'\u2713 '+esc(i[2]):'\u25CB Think about: '+esc(i[0])}</li>`;}).join('');
+  fb.innerHTML=`<div class="fbbox ${got===ideas.length?'ok':'hint'}"><strong>${got} of ${ideas.length} key ideas found.</strong> ${got===ideas.length?'Nice. Make sure your reasons use evidence.':'Revise if you want, then check again.'}<ul>${li}</ul></div>`;
+}
+function srcCheck(v){
+  v=(v||'').trim();if(!v)return '';
+  let host='';try{host=new URL(/^https?:/i.test(v)?v:'https://'+v).hostname.toLowerCase().replace(/^www\./,'');}catch(e){}
+  if(!host||host.indexOf('.')<0)return '<span class="pill warn">Add the web address (URL) of the page you used.</span>';
+  const bad=/(wikipedia|wikihow|quora|reddit|answers\.com|brainly|pinterest|blogspot|wordpress|fandom|tiktok|facebook|instagram|chegg|coursehero|studylib|medium\.com|ask\.com)/;
+  const good=/(\.edu$|\.gov$|\.ac\.uk$|panthera\.org|nationalgeographic\.|si\.edu|sandiegozoo\.org|iucnredlist\.org|worldwildlife\.org|awf\.org|nhm\.ac\.uk)/;
+  if(bad.test(host))return '<span class="pill bad">Not a strong source. Use it to find leads, then cite the organization behind the facts.</span>';
+  if(good.test(host))return '<span class="pill ok">Looks like a professional or educational source.</span>';
+  return '<span class="pill warn">Unknown. Check the site\u2019s About page: is it a professional organization, university, institution, or scientific society?</span>';
+}
+
+/* ---------- DS1 ---------- */
+function renderDS1(){
+  const q4=S.q4m,f4=S.q4f;
+  $('#p-ds1').innerHTML=`
+  <div class="card"><h2>Data Set 1: Behavioral Observation Data</h2>
+    <p>Read the field notes, trying to work out: <strong>What is the story here?</strong> Pay special attention to Lulu (#630) and to cubs 709, 710, 711, 712, and the later cub 713. The data is all real, collected in the field in Etosha National Park.</p>
+    <p>Step through the dates below. Then discuss questions 1 to 7 with your group, but write your <strong>own answers</strong>. Be ready for a class discussion where group members will be called on.</p>
+  </div>
+  <div class="card"><h3>Pride tracker</h3>
+    <div class="row"><button class="btn small alt" id="ev-prev">Earlier</button>
+      <label class="sr" for="ev-range">Date of field notes</label><input type="range" id="ev-range" min="0" max="${EV.length-1}" value="${S.ui.ev}" style="flex:1;min-width:140px">
+      <button class="btn small alt" id="ev-next">Later</button></div>
+    <div class="mapwrap"><svg class="map" viewBox="0 0 800 460" role="img" aria-label="Map showing which pride each lion is in on the selected date">${zonesSvg()}${ORDER.map(tokSvg).join('')}</svg></div>
+    <div class="legend"><span class="m">Male</span><span class="f">Female</span><span class="c">Cub</span><span class="a">Dashed: not mentioned in that day\u2019s notes, shown where last seen</span></div>
+    <div class="wherelist" id="wherelist" aria-live="polite"></div>
+    <div class="fieldnotes" id="notes"></div>
+  </div>
+  <div class="card">
+    ${qChoice('ds1.c1')}${qText('ds1.q1','1')}
+    ${qChoice('ds1.c2')}${qText('ds1.q2','2')}
+    ${qText('ds1.q3','3')}
+    <div class="q"><div class="qh"><span class="qn">4</span><p class="qp">${esc(P['ds1.q4'])}</p></div>
+      <div class="quick"><p class="qp">Quick pick: tick every lion that could be a parent of 713, based only on the notes.</p>
+        <p class="note-s">Possible mothers</p>${FEM.concat(['664','670']).filter((v,i,a)=>a.indexOf(v)===i).sort().map(f=>`<label class="opt"><input type="checkbox" data-q4="m" value="${f}" ${q4.includes(f)?'checked':''}>Female ${f}</label>`).join('')}
+        <p class="note-s">Possible fathers</p>${['633','631','695'].map(f=>`<label class="opt"><input type="checkbox" data-q4="f" value="${f}" ${f4.includes(f)?'checked':''}>Male ${f}</label>`).join('')}
+        <div class="row"><button class="btn small alt" id="q4-check">Check my picks</button></div><div class="fb" id="q4-fb" aria-live="polite"></div></div>
+      <label class="sr" for="ta-ds1.q4">Your answer to 4</label>
+      <textarea id="ta-ds1.q4" data-k="ds1.q4" rows="4" placeholder="Explain your picks in your own words.">${esc(S.ans['ds1.q4']||'')}</textarea>
+      <div class="row"><button class="btn small alt" data-check="ds1.q4">Check my thinking</button></div><div class="fb" id="fb-ds1.q4" aria-live="polite"></div></div>
+    ${qText('ds1.q5','5')}
+    ${qChoice('ds1.c6')}${qText('ds1.q6','6')}
+    ${qText('ds1.q7','7')}
+  </div>
+  <div class="row"><button class="btn tag" data-nav="ds2">On to Data Set 2</button></div>`;
+  updateTracker();
+}
+function zonesSvg(){
+  return Object.keys(ZONES).map(k=>{const z=ZONES[k];const w=372,h=k==='R'||k==='H'?256:156;
+    return `<rect class="zone ${k==='U'||k==='O'?'u':''}" x="${z.x}" y="${z.y}" width="${w}" height="${h}" rx="12"/><text class="zlabel" x="${z.x+14}" y="${z.y+28}">${z.t}</text>${z.s?`<text class="zsub" x="${z.x+14}" y="${z.y+46}">${z.s}</text>`:''}`;}).join('');
+}
+function tokSvg(id){
+  const t=LION[id];const r=t==='M'?22:t==='F'?20:14;
+  const fill=t==='M'?'var(--male)':t==='F'?'var(--female)':'var(--cub)';
+  const stroke=t==='M'?'#8a5a2b':t==='F'?'#9a6a1c':'#b88a2f';
+  const txt=t==='M'?'#fff':'var(--ink)';
+  return `<g class="tok" id="tok-${id}"><circle class="body" r="${r}" fill="${fill}" stroke="${stroke}"/><circle cx="0" cy="${-r+5}" r="2.2" fill="#fff" opacity=".85"/>${id==='630'?'<circle r="29" fill="none" stroke="var(--tag)" stroke-width="3" stroke-dasharray="3 4"/><text class="lulu" y="-34">Lulu</text>':''}<text class="num" y="3" fill="${txt}">${id}</text><text class="sx" y="${r+13}" id="sx-${id}"></text></g>`;
+}
+function trackerState(i){
+  const loc={};
+  for(let k=0;k<=i;k++){for(const id of ORDER){if(EV[k].pos[id]!==undefined)loc[id]=EV[k].pos[id];}}
+  return loc;
+}
+function updateTracker(){
+  const i=S.ui.ev;const loc=trackerState(i);const ev=EV[i];
+  const slots={R:0,H:0,U:0,O:0};const where={R:[],H:[],U:[],O:[]};
+  ORDER.forEach(id=>{
+    const g=$('#tok-'+id);if(!g)return;
+    if(loc[id]===undefined){g.classList.remove('on');return;}
+    const z=ZONES[loc[id]];const n=slots[loc[id]]++;const col=n%6,row=Math.floor(n/6);
+    g.style.transform=`translate(${z.x+42+col*58}px,${z.y+88+row*64}px)`;
+    g.classList.add('on');
+    const mentioned=ev.pos[id]!==undefined;
+    g.classList.toggle('assumed',!mentioned);
+    const sx=$('#sx-'+id);if(sx)sx.textContent=(ev.sex&&CUBSEX[id])?CUBSEX[id]:'';
+    where[loc[id]].push(id+(mentioned?'':' (not mentioned)'));
+  });
+  $('#wherelist').innerHTML=Object.keys(ZONES).filter(k=>where[k].length).map(k=>`<div><strong>${ZONES[k].t}:</strong> ${where[k].join(', ')}</div>`).join('');
+  $('#notes').innerHTML=`<h4>${esc(ev.d)}. ${esc(ev.w)}</h4><ul>${ev.n.map(x=>`<li>${esc(x)}</li>`).join('')}</ul>`;
+  const r=$('#ev-range');if(r){r.value=i;r.setAttribute('aria-valuetext',ev.d);}
+  $('#ev-prev').disabled=i===0;$('#ev-next').disabled=i===EV.length-1;
+}
+function checkQ4(){
+  const m=S.q4m,f=S.q4f;const fb=$('#q4-fb');
+  if(!m.length&&!f.length){fb.innerHTML='<div class="fbbox hint">Tick at least one mother and one father first.</div>';return;}
+  const out=[];
+  if(f.includes('633'))out.push(['hint','633 went missing by June 12, 1992. A lion cub is born about 110 days after mating, so 713 (seen March 1993) was conceived around November 1992. Was 633 around then?']);
+  if(!f.includes('631')||!f.includes('695'))out.push(['hint','Look again at the dominant males in March 1993. Who are the patriarchs when 713 is seen?']);
+  if(f.includes('631')&&f.includes('695')&&!f.includes('633'))out.push(['ok','Fathers: 631 and 695 were the patriarchs when 713 was conceived, so either could be the father. The notes can\u2019t tell you which.']);
+  if(!m.length)out.push(['hint','Pick at least one possible mother.']);
+  else if(m.length<5)out.push(['hint','The notes don\u2019t rule out any of the five females (628, 630, 664, 670, 687). If you left some out, what\u2019s your reason?']);
+  else out.push(['ok','Mothers: any of the five females could be the mother from the notes alone. You will test this with DNA in Data Set 4.']);
+  fb.innerHTML=out.map(o=>`<div class="fbbox ${o[0]}">${o[0]==='ok'?'\u2713 ':'\u25CB '}${esc(o[1])}</div>`).join('');
+}
+
+/* ---------- DS2 ---------- */
+const PREY={springbok:{n:'Springbok',w:'small, about 35 kg',kg:35,p:.30,s:.15},zebra:{n:'Zebra',w:'medium, about 250 kg',kg:250,p:.10,s:.8},giraffe:{n:'Giraffe',w:'large, about 800 kg',kg:800,p:.03,s:1.5}};
+const pHunt=(pr,n)=>1-Math.pow(1-pr.p,1+pr.s*(n-1));
+function renderDS2(){
+  $('#p-ds2').innerHTML=`
+  <div class="card"><h2>Data Set 2: African Lion Research</h2>
+    <p>Hit the internet and research the African lion to better understand lion relationships and behaviors. Cite your sources and use only reliable ones. A reliable source is typically published by professional organizations, institutions, universities, scientific societies, and other reputable sources. Work as a group: <strong>smarter, not harder.</strong> Split up the questions, then share what you find.</p>
+    <p class="note-s">Pasting a web address into a source box gives you a quick reliability check. It is only a first look, so also read the site\u2019s About page.</p>
+    ${qText('ds2.q1','1',{rows:2,src:1})}
+    ${qText('ds2.q2m','2a',{src:1})}
+    ${qText('ds2.q2f','2b',{src:1})}
+    ${qText('ds2.q3','3',{rows:3,src:1})}
+    ${qText('ds2.q4','4',{src:1})}
+    ${qText('ds2.q5','5',{rows:2,src:1})}
+    ${qText('ds2.q6','6',{rows:2,src:1})}
+    ${qText('ds2.q7m','7a',{rows:3,src:1})}
+    ${qText('ds2.q7f','7b',{rows:3,src:1})}
+    ${qText('ds2.q7c','7c',{rows:3,src:1})}
+    ${qText('ds2.q8','8',{src:1})}
+    ${qText('ds2.q9','9',{src:1})}
+    ${qText('ds2.q10','10',{src:1})}
+  </div>
+  <div class="card"><h3>Pride Challenge: does group size change hunting success?</h3>
+    <p>Question 11 asks how group behavior helps individuals survive. Test one possible benefit: hunting. You choose what the lions hunt and how many hunt together, then run 20 hunts.</p>
+    <p class="note-s">This is a teaching model with made-up numbers, not real field data. It is built to show a pattern for you to think about, not to measure real lions.</p>
+    <div class="quick"><p class="qp">Predict first: for which prey would a larger group help the most?</p>
+      ${[['small','Small prey (springbok)'],['medium','Medium prey (zebra)'],['large','Large prey (giraffe)'],['same','It helps the same for all prey']].map(o=>`<label class="opt"><input type="radio" name="hpred" data-hpred="${o[0]}" ${S.hunt.pred===o[0]?'checked':''}>${o[1]}</label>`).join('')}</div>
+    <div class="row">
+      <div style="flex:1;min-width:200px"><label for="h-prey">Prey</label><select id="h-prey">${Object.keys(PREY).map(k=>`<option value="${k}" ${S.hunt.prey===k?'selected':''}>${PREY[k].n} (${PREY[k].w})</option>`).join('')}</select></div>
+      <div style="flex:1;min-width:200px"><label for="h-n">Lions hunting together: <strong id="h-nv">${S.hunt.n}</strong></label><input type="range" id="h-n" min="1" max="6" value="${S.hunt.n}"></div>
+    </div>
+    <div class="row"><button class="btn tag" id="h-run">Run 20 hunts</button><button class="btn alt" id="h-exp">Show long-run averages for this prey</button><button class="btn alt small" id="h-clear">Clear table</button></div>
+    <div class="fb" id="h-out" aria-live="polite"></div>
+    <div class="tblwrap"><table class="dt"><thead><tr><th>Prey</th><th>Lions hunting</th><th>Kills in 20 hunts</th><th>Success rate</th><th>Meat per lion (kg)</th></tr></thead><tbody id="h-log"></tbody></table></div>
+    <div id="h-chart"></div>
+    ${qText('ds2.hunt','Test',{rows:3})}
+    <div class="fb" id="h-pred-fb"></div>
+  </div>
+  <div class="card">${qText('ds2.q11','11',{rows:5})}
+    <p class="note-s">Use your research and the Pride Challenge as evidence.</p></div>
+  <div class="row"><button class="btn tag" data-nav="ds3">On to Data Set 3</button></div>`;
+  $$('[data-src]').forEach(el=>{document.getElementById('srcfb-'+el.dataset.src).innerHTML=srcCheck(el.value);});
+  renderHuntLog();
+}
+function renderHuntLog(){
+  $('#h-log').innerHTML=S.hunt.log.length?S.hunt.log.map(r=>`<tr><td>${esc(PREY[r.prey].n)}</td><td>${r.n}</td><td>${r.k}</td><td>${Math.round(r.k/20*100)}%</td><td>${r.meat.toFixed(1)}</td></tr>`).join(''):'<tr><td colspan="5" class="note-s">No runs yet. Run a few hunts and your results will be recorded here.</td></tr>';
+}
+function runHunt(){
+  const pr=PREY[S.hunt.prey],n=S.hunt.n,p=pHunt(pr,n);let k=0;for(let i=0;i<20;i++)if(Math.random()<p)k++;
+  const meat=k*pr.kg*0.5/n;
+  S.hunt.log.push({prey:S.hunt.prey,n,k,meat});if(S.hunt.log.length>16)S.hunt.log.shift();
+  $('#h-out').innerHTML=`<div class="fbbox ok">${n} lion${n>1?'s':''} hunting ${pr.n.toLowerCase()}: <strong>${k} kills in 20 hunts</strong>. Each lion\u2019s share of the meat is about <strong>${meat.toFixed(1)} kg</strong>.</div>`;
+  renderHuntLog();save();
+}
+function huntExpected(){
+  const pr=PREY[S.hunt.prey];const rows=[];let maxM=0;
+  for(let n=1;n<=6;n++){const p=pHunt(pr,n);const m=20*p*pr.kg*.5/n;rows.push({n,p,m,z:Math.pow(1-p,20)});maxM=Math.max(maxM,m);}
+  $('#h-chart').innerHTML=`<h4>Long-run averages: ${esc(pr.n)}</h4><div class="bars"><strong>Lions</strong><strong>Success rate of each hunt</strong><span></span>${rows.map(r=>`<span>${r.n}</span><div class="bar" style="width:${Math.max(2,r.p*100)}%"></div><span>${Math.round(r.p*100)}%</span>`).join('')}</div>
+  <div class="bars" style="margin-top:10px"><strong>Lions</strong><strong>Meat per lion in 20 hunts</strong><span></span>${rows.map(r=>`<span>${r.n}</span><div class="bar g" style="width:${Math.max(2,r.m/maxM*100)}%"></div><span>${r.m.toFixed(0)} kg</span>`).join('')}</div>
+  <div class="bars" style="margin-top:10px"><strong>Lions</strong><strong>Chance of getting no kills at all in 20 hunts</strong><span></span>${rows.map(r=>`<span>${r.n}</span><div class="bar" style="width:${Math.max(2,r.z*100)}%;background:var(--tag)"></div><span>${Math.round(r.z*100)}%</span>`).join('')}</div>
+  <p class="note-s">Success rate shows what happens to each hunt. Meat per lion shows what each member gets after sharing. The last chart shows how risky it is to go hungry. Compare how all three change.</p>`;
+  const preds={small:'springbok',medium:'zebra',large:'giraffe'};
+  if(S.hunt.pred){const target=S.hunt.pred==='same'?'none':preds[S.hunt.pred];
+    $('#h-pred-fb').innerHTML=`<div class="fbbox hint">Your prediction was: <strong>${esc(({small:'small prey',medium:'medium prey',large:'large prey',same:'the same for all prey'})[S.hunt.pred])}</strong>. Try all three prey types and compare your table to it. Was your prediction right? What did you learn?</div>`;}
+}
+
+/* ---------- DS3: karyotype sorter ---------- */
+const CEN=[.30,.42,.28,.50,.35,.22,.45,.33,.26,.40,.48,.30,.37,.24,.44,.34,.50,.27];
+function mkBands(seed){let s=seed*9301+49297;const r=()=>{s=(s*9301+49297)%233280;return s/233280;};const n=3+Math.floor(r()*3);const a=[];for(let i=0;i<n;i++)a.push({y:.1+r()*.8,t:1.6+r()*3});return a;}
+const KT={};
+for(let i=1;i<=18;i++)KT[String(i)]={len:Math.round(98-(i-1)*3.4),c:CEN[i-1],b:mkBands(i)};
+KT.X={len:70,c:.4,b:mkBands(31)};KT.Y={len:34,c:.45,b:mkBands(47)};
+const tileType=t=>t<36?String(Math.floor(t/2)+1):(t===36?'X':'Y');
+function chromSvg(type,w,h){
+  const k=KT[type];const L=k.len,r=7,pe=L*k.c;
+  const d=`M${-r},${r} A${r},${r} 0 0 1 ${r},${r} L${r},${pe-3} Q${r*.35},${pe} ${r},${pe+3} L${r},${L-r} A${r},${r} 0 0 1 ${-r},${L-r} L${-r},${pe+3} Q${-r*.35},${pe} ${-r},${pe-3} Z`;
+  const bands=k.b.map(b=>{const y=Math.max(r,Math.min(L-r,b.y*L));if(Math.abs(y-pe)<5)return '';return `<line x1="${-r+1.5}" x2="${r-1.5}" y1="${y}" y2="${y}" stroke="#2f2418" stroke-width="${b.t}" opacity=".7"/>`;}).join('');
+  return `<svg width="${w}" height="${h}" viewBox="${-16} ${-4} 32 ${108}" aria-hidden="true" focusable="false"><path d="${d}" fill="#d9cdb6" stroke="#4a3b2b" stroke-width="1.3"/>${bands}</svg>`;
+}
+function initKaryo(){if(!S.karyo.order){const a=[...Array(38).keys()];for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}S.karyo.order=a;}}
+function renderDS3(){
+  initKaryo();
+  $('#p-ds3').innerHTML=`
+  <div class="card"><h2>Data Set 3: Karyotype Data</h2>
+    <p>A karyotype is an organized picture of an individual's chromosomes. All lions have the same basic karyotype. Each chromosome contains genes. Individually, read through this data set, considering the question: <strong>What are chromosomes and what do they tell us?</strong></p>
+    <p>Then, with your team, build a karyotype of your own. Below are all the chromosomes from one lion cub, jumbled together. Click two chromosomes that match. Look at <strong>length</strong>, <strong>where the narrow waist (centromere) sits</strong>, and the <strong>dark bands</strong>.</p>
+    <p class="note-s">These are simplified drawings made for this activity. Real lion chromosomes look different, but the idea is the same.</p>
+  </div>
+  <div class="card"><h3>Karyotype builder</h3>
+    <div class="row"><strong id="k-count"></strong><span id="k-msg" aria-live="polite"></span></div>
+    <div class="pool" id="k-pool"></div>
+    <h4>Your karyotype</h4><div class="kt" id="k-done"></div>
+    <div id="k-after"></div>
+  </div>
+  <div class="card"><h3>Making Sense of Data Set 3</h3>
+    <p>With your team, carefully study your karyotype and discuss the following questions.</p>
+    <div class="q"><div class="qh"><span class="qn">1</span><p class="qp">${esc(P['ds3.q1a'])}</p></div>
+      <div class="row"><label for="k-q1">Total chromosomes</label><input type="number" id="k-q1" style="max-width:110px" min="0" value="${esc(S.ans['ds3.q1a']||'')}" data-k="ds3.q1a"><label for="k-q1p">Number of pairs</label><input type="number" id="k-q1p" style="max-width:110px" min="0" value="${esc(S.ans['ds3.q1p']||'')}" data-k="ds3.q1p"><button class="btn small alt" id="k-q1c">Check</button></div><div class="fb" id="k-q1fb" aria-live="polite"></div></div>
+    ${qText('ds3.q2','2')}
+    ${qChoice('ds3.c3')}${qText('ds3.q3','3')}
+  </div>
+  <div class="card note"><h3>Looking ahead: genes sit on chromosomes</h3>
+    <p>Each locus (gene location) on your worksheet sits at one spot on one chromosome pair. Pick a cub and a locus to see the two chromosomes of that pair.</p>
+    <div class="row"><div style="flex:1;min-width:120px"><label for="z-cub">Cub</label><select id="z-cub">${CUBS.map(c=>`<option>${c}</option>`).join('')}</select></div><div style="flex:1;min-width:120px"><label for="z-loc">Locus</label><select id="z-loc">${LOCI.map((l,i)=>`<option value="${i}">${l}</option>`).join('')}</select></div></div>
+    <div id="z-out"></div></div>
+  <div class="row"><button class="btn tag" data-nav="ds4">On to Data Set 4</button></div>`;
+  renderKaryo();renderZoom();
+}
+function renderKaryo(){
+  const paired=new Set(S.karyo.paired.flat());
+  $('#k-pool').innerHTML=S.karyo.order.filter(t=>!paired.has(t)).map(t=>`<button class="tile" data-tile="${t}" aria-pressed="${S.karyo.sel===t}" aria-label="Unmatched chromosome">${chromSvg(tileType(t),52,108)}</button>`).join('');
+  $('#k-count').textContent=`Pairs found: ${S.karyo.paired.length} of 19`;
+  $('#k-msg').innerHTML=S.karyo.msg||'';
+  const sorted=S.karyo.paired.slice().sort((a,b)=>{const ka=tileType(a[0]),kb=tileType(b[0]);const o=x=>x==='X'||x==='Y'?99:+x;return o(ka)-o(kb);});
+  $('#k-done').innerHTML=sorted.map(p=>{const a=tileType(p[0]),b=tileType(p[1]);const lab=(a==='X'||a==='Y')?'X Y':'Pair '+a;return `<div class="kp"><div style="display:flex;gap:4px;justify-content:center">${chromSvg(p[0]<p[1]?a:a,34,72)}${chromSvg(b,34,72)}</div>${lab}</div>`;}).join('');
+  $('#k-after').innerHTML=S.karyo.paired.length===19?`<div class="fbbox ok"><strong>Karyotype complete.</strong> Count what you built: ${S.karyo.paired.length} pairs, each with two chromosomes. One pair doesn\u2019t match in size. That is the sex-chromosome pair, X and Y. An X and a Y means this cub is male. In Data Set 1, which cub appeared to be male?</div>`:'';
+}
+function karyoClick(t){
+  const k=S.karyo;
+  if(k.sel===null){k.sel=t;k.msg='';}
+  else if(k.sel===t){k.sel=null;}
+  else{
+    const a=tileType(k.sel),b=tileType(t),A=KT[a],B=KT[b];
+    const sexA=a==='X'||a==='Y',sexB=b==='X'||b==='Y';
+    if(a===b){k.paired.push([k.sel,t]);k.msg='<span class="pill ok">\u2713 Match: same length, centromere, and banding.</span>';k.sel=null;}
+    else if(sexA&&sexB){k.paired.push([k.sel,t]);k.msg='<span class="pill ok">\u2713 These two don\u2019t match in size, but they are the sex chromosomes: X and Y.</span>';k.sel=null;}
+    else{
+      let why='the banding patterns are different';
+      if(Math.abs(A.len-B.len)>6)why='they are different lengths';else if(Math.abs(A.c-B.c)>.07)why='the narrow waist (centromere) is in a different place';
+      k.msg=`<span class="pill bad">\u2717 Not a match: ${why}.</span>`;k.sel=null;
+    }
+  }
+  renderKaryo();progress();save();
+}
+function renderZoom(){
+  const c=$('#z-cub').value,l=+$('#z-loc').value;const a=al('C',c,l);
+  $('#z-out').innerHTML=`<div style="display:flex;gap:30px;align-items:flex-end;margin-top:8px"><div style="text-align:center">${chromSvg('7',44,96)}<div><strong>${a[0]}</strong></div></div><div style="text-align:center">${chromSvg('7',44,96)}<div><strong>${a[1]}</strong></div></div></div>
+  <p>Cub ${c} at ${LOCI[l]}: genotype <strong>${fmt(G.C[c][l])}</strong>. One of these two chromosomes came from the mother and one from the father. The genotype is written in alphabetical order, so it doesn\u2019t say which is which.</p>`;
+}
+
+/* ---------- DS4: parentage lab ---------- */
+function L(c){return S.lab[c]||(S.lab[c]={pm:'',pf:'',m:{},mres:null,mother:null,dad:{},dres:null,dDone:false,f:{},fres:null,father:null,hint:{m:0,d:0,f:0}});}
+function cellG(grp,id,l,c){
+  const parts=al(grp,id,l);
+  return parts.map(a=>`<span class="al ${S.ui.hl&&al('C',c,l).includes(a)?'m':''}">${a}</span>`).join(' / ');
+}
+function genoHead(){return `<tr><th></th>${LOCI.map(l=>`<th>${l}</th>`).join('')}</tr>`;}
+function renderDS4(){
+  $('#p-ds4').innerHTML=`
+  <div class="card"><h2>Data Set 4: Genotype Data</h2>
+    <p>Individually read through this data set, considering the question: <strong>How can we determine parentage?</strong></p>
+    <p>A genotype is the combination of alleles (versions of a gene) that each organism has. Each lion gets <strong>one allele from each parent</strong>. The order of alleles is alphabetical and does <em>not</em> show which parent a cub got the allele from. The blood samples from the field notes were sent to a genetics lab, and these are the results. You will make observations and look for patterns. Some productive struggle makes you a stronger scientist.</p>
+    <details><summary>Show the alleles for each locus</summary>
+      <div class="tblwrap"><table class="dt"><thead><tr><th>FCA26</th><th>FCA45</th><th>FCA77</th><th>FCA96</th></tr></thead><tbody><tr><td>A</td><td>M</td><td>S</td><td>D</td></tr><tr><td>B</td><td>N</td><td>T</td><td>E</td></tr><tr><td>C</td><td>O</td><td>U</td><td>F</td></tr><tr><td></td><td></td><td></td><td>G</td></tr><tr><td></td><td></td><td></td><td>H</td></tr></tbody></table></div></details>
+    <p class="note-s">The female genotypes are for all females sighted with the cubs that could be sampled. Females 664 and 670 were never successfully sampled.</p>
+  </div>
+  <div class="card"><h3>Making Quick Sense of the Data</h3>
+    ${qChoice('ds4.c1')}${qText('ds4.q1','1',{rows:3})}
+    ${qChoice('ds4.c2')}${qText('ds4.q2','2',{rows:4})}
+  </div>
+  <div class="card"><h3>Genotype Data #2 (adult lions)</h3>
+    <div class="tblwrap"><table class="dt"><thead>${genoHead()}</thead><tbody>
+      <tr><th colspan="5" scope="colgroup" style="text-align:left;background:#e4ebe0">Females</th></tr>${FEM.map(f=>`<tr><th scope="row">${f}</th>${LOCI.map((_,l)=>`<td>${fmt(G.F[f][l])}</td>`).join('')}</tr>`).join('')}
+      <tr><th colspan="5" scope="colgroup" style="text-align:left;background:#e4ebe0">Males</th></tr>${MAL.map(f=>`<tr><th scope="row">${f}</th>${LOCI.map((_,l)=>`<td>${fmt(G.M[f][l])}</td>`).join('')}</tr>`).join('')}
+    </tbody></table></div></div>
+  <div class="card"><h3>Parentage Lab</h3>
+    <p>Use Genotype Data #2 to determine the mother and the father of each cub. Pick a cub. Before you test, make a prediction from the field notes. Then work through three steps.</p>
+    <div class="cubtabs" role="tablist" id="cubtabs"></div>
+    <label class="opt" style="max-width:340px"><input type="checkbox" id="hl-toggle" ${S.ui.hl?'checked':''}>Highlight alleles that match the cub (a scaffold you can turn off)</label>
+    <div id="labcard"></div>
+  </div>
+  <div class="card"><h3>Genotype Data #1 (your results)</h3><div class="tblwrap" id="dt1"></div></div>
+  <div class="row"><button class="btn tag" data-nav="final">On to the Final Report</button></div>`;
+  renderLab();
+}
+function renderCubTabs(){
+  $('#cubtabs').innerHTML=CUBS.map(c=>`<button role="tab" data-cub="${c}" aria-selected="${S.ui.cub===c}" class="${L(c).father?'done':''}">Cub ${c}</button>`).join('');
+}
+function dt1(){
+  $('#dt1').innerHTML=`<table class="dt"><thead><tr><th>Cubs</th>${LOCI.map(l=>`<th>${l}</th>`).join('')}<th>Mother</th><th>Father</th></tr></thead><tbody>${CUBS.map(c=>`<tr><th scope="row">${c}</th>${LOCI.map((_,l)=>`<td>${fmt(G.C[c][l])}</td>`).join('')}<td>${L(c).mother||'\u2014'}</td><td>${L(c).father||'\u2014'}</td></tr>`).join('')}</tbody></table>`;
+}
+function renderLab(){renderCubTabs();$('#labcard').innerHTML=labCard(S.ui.cub);dt1();progress();}
+function labCard(c){
+  const s=L(c);
+  const pred=`<div class="step"><h4>Predict first</h4><p class="note-s">Using only the field notes, who do you think are the mother and father of cub ${c}? (You can change your mind. This is a guess.)</p>
+    <div class="row"><div><label for="pm">Mother</label><select id="pm" data-pred="pm"><option value="">Choose</option>${['628','630','664','670','687'].map(f=>`<option ${s.pm===f?'selected':''}>${f}</option>`).join('')}</select></div>
+    <div><label for="pf">Father</label><select id="pf" data-pred="pf"><option value="">Choose</option>${['633','631','695','668','657'].map(f=>`<option ${s.pf===f?'selected':''}>${f}</option>`).join('')}</select></div></div></div>`;
+  const head=`<div class="tblwrap"><table class="dt"><thead>${genoHead()}</thead><tbody><tr><th scope="row">Cub ${c}</th>${LOCI.map((_,l)=>`<td><strong>${fmt(G.C[c][l])}</strong></td>`).join('')}</tr></tbody></table></div>`;
+  return head+pred+stepM(c,s)+(s.mother?stepD(c,s):`<div class="step locked"><h4>Step 2: What must Dad have given?</h4><p>Unlocks when you find the mother.</p></div>`)+(s.dDone?stepF(c,s):`<div class="step locked"><h4>Step 3: Find the father</h4><p>Unlocks after step 2.</p></div>`)+(s.father?doneBox(c,s):'')+`<p><button class="btn alt small" data-act="reset" data-cub="${c}">Start this cub over</button></p>`;
+}
+function hintBtn(c,k,max){const s=L(c);return `<button class="btn small alt" data-act="hint" data-step="${k}" data-cub="${c}">${s.hint[k]?'Another hint':'Need a hint?'}</button>`;}
+function hintText(c,k){
+  const s=L(c);const n=s.hint[k];if(!n)return '';
+  const out=[];
+  if(k==='m'){
+    out.push('The cub gets one allele from each parent, so the mother must carry <strong>at least one of the cub\u2019s two alleles at every locus</strong>. Find a locus where a female has neither.');
+    if(n>=2){const f=FEM.find(x=>momFail(c,x)>=0);if(f){const l=momFail(c,f);out.push(`Look closely at female ${f} at ${LOCI[l]}. The cub is ${fmt(G.C[c][l])}. Does she have either allele?`);}}
+    if(n>=3)out.push(`Female(s) you can rule out: ${FEM.filter(x=>momFail(c,x)>=0).join(', ')}.`);
+  }
+  if(k==='d'){
+    out.push('Start with Mom. Whatever allele Mom <em>can</em> give, the other allele must have come from Dad. Ask: if Dad gave this allele, could Mom have given the other one?');
+    if(n>=2){const l=LOCI.findIndex((_,i)=>mustDad(c,s.mother,i).length<al('C',c,i).length&&al('C',c,i)[0]!==al('C',c,i)[1]);if(l>=0)out.push(`Try ${LOCI[l]}: the cub is ${fmt(G.C[c][l])} and Mom is ${fmt(G.F[s.mother][l])}. Which of the cub\u2019s alleles could Mom <em>not</em> have given?`);}
+    if(n>=3)out.push('Where the cub has two different alleles and Mom has only one of them, Dad must have given the other. Where Mom has both, Dad could have given either.');
+  }
+  if(k==='f'){
+    out.push('A father has to be able to supply the alleles you found in step 2 at <strong>all four loci</strong>. A male missing them at even one locus can be crossed off.');
+    if(n>=2){const m=MAL.find(x=>dadFail(c,s.mother,x)>=0);if(m){const l=dadFail(c,s.mother,m);out.push(`Check male ${m} at ${LOCI[l]}. Dad needed ${mustDad(c,s.mother,l).join(' or ')}. Does he have ${mustDad(c,s.mother,l).length>1?'either':'it'}?`);}}
+    if(n>=3)out.push(`Males you can rule out: ${MAL.filter(x=>dadFail(c,s.mother,x)>=0).join(', ')}.`);
+  }
+  return `<div class="fbbox hint">${out.slice(0,n).map(x=>'<div>'+x+'</div>').join('')}</div>`;
+}
+function stepM(c,s){
+  const rows=FEM.map(f=>{const v=s.m[f]||'';const r=s.mres&&s.mres[f];
+    return `<tr class="${r?(r.ok?'okrow':'badrow'):''}"><th scope="row">Female ${f}</th>${LOCI.map((_,l)=>`<td>${cellG('F',f,l,c)}</td>`).join('')}<td class="choice"><label><input type="radio" name="m-${c}-${f}" data-lab="m" data-cub="${c}" data-id="${f}" value="p" ${v==='p'?'checked':''}> Possible mother</label><label><input type="radio" name="m-${c}-${f}" data-lab="m" data-cub="${c}" data-id="${f}" value="o" ${v==='o'?'checked':''}> Rule out</label></td></tr>${r?`<tr class="why"><td colspan="6">${r.t}</td></tr>`:''}`;}).join('');
+  return `<div class="step"><h4>Step 1: Which females can be ruled out as the mother?</h4>
+   <p>Cross off any female who couldn\u2019t have given this cub one of its two alleles at every locus. Mark every row, then check.</p>
+   <div class="tblwrap"><table class="dt"><thead><tr><th></th>${LOCI.map(l=>`<th>${l}</th>`).join('')}<th>Your call</th></tr></thead><tbody>${rows}</tbody></table></div>
+   <div class="row"><button class="btn" data-act="check-m" data-cub="${c}">Check my eliminations</button>${hintBtn(c,'m')}</div>
+   ${s.mres&&s.msg?s.msg:''}${hintText(c,'m')}
+   ${s.mother?`<div class="fbbox ok"><strong>Mother of cub ${c}: female ${s.mother}.</strong></div>`:''}</div>`;
+}
+function stepD(c,s){
+  const rows=LOCI.map((_,l)=>{
+    const cub=al('C',c,l);const opts=uniq(cub);const sel=s.dad[l]||[];const r=s.dres&&s.dres[l];
+    return `<tr class="${r?(r.ok?'okrow':'badrow'):''}"><th scope="row">${LOCI[l]}</th><td>${fmt(G.C[c][l])}</td><td>${fmt(G.F[s.mother][l])}</td><td style="text-align:left">${opts.map(a=>`<button class="chip" aria-pressed="${sel.includes(a)}" data-act="chip" data-cub="${c}" data-l="${l}" data-a="${a}">${a}</button>`).join('')}</td></tr>${r?`<tr class="why"><td colspan="4">${r.t}</td></tr>`:''}`;}).join('');
+  return `<div class="step"><h4>Step 2: Which allele(s) could Dad have given at each locus?</h4>
+   <p>Mom is female ${s.mother}. At each locus, tap every allele that Dad <em>could</em> have given. Think: Mom gave one allele, so Dad gave the other.</p>
+   <div class="tblwrap"><table class="dt"><thead><tr><th>Locus</th><th>Cub ${c}</th><th>Mom ${s.mother}</th><th>Dad could have given</th></tr></thead><tbody>${rows}</tbody></table></div>
+   <div class="row"><button class="btn" data-act="check-d" data-cub="${c}">Check my alleles</button>${hintBtn(c,'d')}</div>${hintText(c,'d')}
+   ${s.dDone?'<div class="fbbox ok"><strong>All four loci are right.</strong> Now use them to find Dad.</div>':''}</div>`;
+}
+function stepF(c,s){
+  const rows=MAL.map(m=>{const v=s.f[m]||'';const r=s.fres&&s.fres[m];
+    return `<tr class="${r?(r.ok?'okrow':'badrow'):''}"><th scope="row">Male ${m}</th>${LOCI.map((_,l)=>`<td>${cellG('M',m,l,c)}</td>`).join('')}<td class="choice"><label><input type="radio" name="f-${c}-${m}" data-lab="f" data-cub="${c}" data-id="${m}" value="p" ${v==='p'?'checked':''}> Possible father</label><label><input type="radio" name="f-${c}-${m}" data-lab="f" data-cub="${c}" data-id="${m}" value="o" ${v==='o'?'checked':''}> Rule out</label></td></tr>${r?`<tr class="why"><td colspan="6">${r.t}</td></tr>`:''}`;}).join('');
+  return `<div class="step"><h4>Step 3: Which males can be ruled out as the father?</h4>
+   <p>Dad has to be able to supply the alleles you found in step 2 at <em>every</em> locus.</p>
+   <div class="tblwrap"><table class="dt"><thead><tr><th></th>${LOCI.map(l=>`<th>${l}</th>`).join('')}<th>Your call</th></tr></thead><tbody>${rows}</tbody></table></div>
+   <div class="row"><button class="btn" data-act="check-f" data-cub="${c}">Check my eliminations</button>${hintBtn(c,'f')}</div>${s.fres&&s.fmsg?s.fmsg:''}${hintText(c,'f')}</div>`;
+}
+function doneBox(c,s){
+  const m=s.mother,f=s.father;
+  const lines=LOCI.map((_,l)=>{const cub=al('C',c,l);const mm=al('F',m,l),dd=al('M',f,l);let a=null;
+    for(const x of mm){for(const y of dd){if([x,y].sort().join('/')===[...cub].sort().join('/')&&!a)a=[x,y];}}
+    return `<tr><th scope="row">${LOCI[l]}</th><td>${a?a[0]:'?'}</td><td>${a?a[1]:'?'}</td><td>${fmt(G.C[c][l])}</td></tr>`;}).join('');
+  let cmp='';
+  if(s.pm||s.pf){cmp=`<p>Your earlier prediction: mother ${s.pm||'none'} ${s.pm===m?'(\u2713 matches the DNA)':'(DNA says '+m+')'}, father ${s.pf||'none'} ${s.pf===f?'(\u2713 matches the DNA)':'(DNA says '+f+')'}.</p>`;}
+  let q4='';
+  if(c==='713'){const g=S.q4f;q4=`<p>Your Data Set 1 pick for 713\u2019s father: ${g.length?g.join(', '):'none'}. The DNA says <strong>${f}</strong>${g.includes(f)?', which was one of your picks.':'. Think about what the notes could and couldn\u2019t tell you.'}</p>`;}
+  return `<div class="fbbox ok"><strong>Cub ${c}: mother ${m}, father ${f}.</strong></div>${cmp}${q4}
+   <div class="tblwrap"><table class="dt" style="max-width:480px"><thead><tr><th>Locus</th><th>From Mom</th><th>From Dad</th><th>Cub</th></tr></thead><tbody>${lines}</tbody></table></div>
+   <p class="note-s">In places where several splits work, the alleles shown are one possible match. The picture doesn\u2019t say which allele came from which parent, only that the pair fits.</p>`;
+}
+function labAct(e){
+  const t=e.target.closest('[data-act]');if(!t)return false;
+  const c=t.dataset.cub;const s=L(c);const a=t.dataset.act;
+  if(a==='hint'){const k=t.dataset.step;s.hint[k]=Math.min(3,s.hint[k]+1);}
+  else if(a==='reset'){delete S.lab[c];}
+  else if(a==='chip'){const l=+t.dataset.l,al_=t.dataset.a;const cur=s.dad[l]||[];s.dad[l]=cur.includes(al_)?cur.filter(x=>x!==al_):cur.concat(al_);if(s.dres)delete s.dres[l];}
+  else if(a==='check-m'){
+    if(FEM.some(f=>!s.m[f])){s.mres=null;s.msg='<div class="fbbox hint">Mark every female as Possible or Rule out first.</div>';s.mres={};}
+    else{
+      s.mres={};let allOk=true;
+      FEM.forEach(f=>{const fail=momFail(c,f);const should=fail<0?'p':'o';const ok=s.m[f]===should;if(!ok)allOk=false;
+        if(ok){s.mres[f]={ok:1,t:fail<0?`\u2713 Correct. Female ${f} has at least one of the cub\u2019s alleles at all four loci.`:`\u2713 Correct. At ${LOCI[fail]} the cub is ${fmt(G.C[c][fail])}, but female ${f} is ${fmt(G.F[f][fail])}. She has neither allele, so she can\u2019t be the mother.`};}
+        else s.mres[f]={ok:0,t:`\u2717 Look again at female ${f}. Go locus by locus: does she have at least one of the cub\u2019s two alleles at <em>every</em> locus?`};});
+      s.msg=allOk?'':'<div class="fbbox hint">Some calls need another look. Use a hint if you\u2019re stuck.</div>';
+      if(allOk){s.mother=TRUTH[c].mother;}
+    }
+  }
+  else if(a==='check-d'){
+    s.dres={};let allOk=true;
+    LOCI.forEach((_,l)=>{const must=mustDad(c,s.mother,l).slice().sort().join();const sel=(s.dad[l]||[]).slice().sort().join();const ok=must===sel;if(!ok)allOk=false;
+      if(ok)s.dres[l]={ok:1,t:'\u2713 '+explainLocus(c,s.mother,l)};
+      else s.dres[l]={ok:0,t:`\u2717 Not yet. For each allele ask: if Dad gave it, could Mom have given the <em>other</em> allele? (Mom is ${fmt(G.F[s.mother][l])}.)`};});
+    s.dDone=allOk;
+  }
+  else if(a==='check-f'){
+    if(MAL.some(f=>!s.f[f])){s.fres={};s.fmsg='<div class="fbbox hint">Mark every male as Possible or Rule out first.</div>';}
+    else{
+      s.fres={};let allOk=true;
+      MAL.forEach(m=>{const fail=dadFail(c,s.mother,m);const should=fail<0?'p':'o';const ok=s.f[m]===should;if(!ok)allOk=false;
+        if(ok)s.fres[m]={ok:1,t:fail<0?`\u2713 Correct. Male ${m} can supply the needed allele at all four loci.`:`\u2713 Correct. At ${LOCI[fail]} Dad needed ${mustDad(c,s.mother,fail).join(' or ')}, but male ${m} is ${fmt(G.M[m][fail])}.`};
+        else s.fres[m]={ok:0,t:`\u2717 Look again at male ${m}. Can he supply one of the needed alleles at <em>every</em> locus?`};});
+      s.fmsg=allOk?'':'<div class="fbbox hint">Some calls need another look. Use a hint if you\u2019re stuck.</div>';
+      if(allOk)s.father=TRUTH[c].father;
+    }
+  }
+  renderLab();save();return true;
+}
+function explainLocus(c,mom,l){
+  const x=al('C',c,l),m=al('F',mom,l),must=mustDad(c,mom,l);
+  if(x[0]===x[1])return `The cub is ${fmt(G.C[c][l])}, so both parents gave ${x[0]}.`;
+  if(must.length===2)return `Mom has both ${x[0]} and ${x[1]}, so she could have given either one, and Dad could have given either.`;
+  const d=must[0];const gives=uniq(m.filter(a=>x.includes(a)));
+  return `Mom (${fmt(G.F[mom][l])}) can only give ${gives.join(' or ')}, so the other allele, ${d}, must have come from Dad.`;
+}
+
+/* ---------- Final report & submit ---------- */
+function renderFinal(){
+  $('#p-final').innerHTML=`
+  <div class="card"><h2>The Final Report</h2>
+    <p>Tie all the evidence together to answer the two driving questions. Use evidence from the field notes, the research, the karyotypes, and the genotypes. Write your own answers.</p>
+    <div id="final-ev"></div>
+  </div>
+  <div class="card">
+    ${qText('fr.q1','1',{rows:3})}
+    ${qText('fr.q2','2',{rows:4})}
+    <div class="q"><div class="qh"><span class="qn">3</span><p class="qp">Was Lulu related to any of the cubs that were not her own? If so, which ones, how was she related, and how does the data support this?</p></div>
+      ${qText('fr.q3a','\u2022',{prompt:'Cubs she is related to that are not her own:',rows:2})}
+      ${qText('fr.q3b','\u2022',{prompt:'How she was related to them:',rows:3})}
+      ${qText('fr.q3c','\u2022',{prompt:'Evidence from Data Set 4 which supports this:',rows:3})}</div>
+    ${qText('fr.q4','4',{rows:5})}
+    ${qText('fr.q5','5',{rows:5})}
+  </div>
+  <div class="row"><button class="btn tag" data-nav="submit">On to Turn In</button></div>`;
+}
+function renderFinalEvidence(){
+  const e=$('#final-ev');if(!e)return;
+  const done=CUBS.filter(c=>L(c).father).length;
+  e.innerHTML=`<details class="card note"><summary>Your parentage results (from Data Set 4)</summary>${done<5?`<p>You have finished ${done} of 5 cubs in the Parentage Lab. Finish them to fill in the table.</p>`:''}<div class="tblwrap"><table class="dt"><thead><tr><th>Cub</th><th>Mother</th><th>Father</th></tr></thead><tbody>${CUBS.map(c=>`<tr><th scope="row">${c}</th><td>${L(c).mother||'\u2014'}</td><td>${L(c).father||'\u2014'}</td></tr>`).join('')}</tbody></table></div><p class="note-s">Compare these to the Lulu story in Data Set 1: where was Lulu (630) and who was with her?</p></details>`;
+}
+function head(){return `Name: ${S.info.name||'__________'}   Hour: ${S.info.hour||'____'}   Group #: ${S.info.group||'___'}`;}
+function A(k){return (S.ans[k]||'').trim()||'(no answer)';}
+function finalText(){
+  return `${head()}\n#3 Lulu the Lioness: Final Report\n\n1. ${P['fr.q1']}\n${A('fr.q1')}\n\n2. ${P['fr.q2']}\n${A('fr.q2')}\n\n3. Was Lulu related to any of the cubs that were not her own? If so, which ones, how was she related, and how does the data support this?\n- Cubs she is related to that are not her own: ${A('fr.q3a')}\n- How she was related to them: ${A('fr.q3b')}\n- Evidence from Data Set 4 which supports this: ${A('fr.q3c')}\n\n4. ${P['fr.q4']}\n${A('fr.q4')}\n\n5. ${P['fr.q5']}\n${A('fr.q5')}\n`;
+}
+function packetText(){
+  const ds1=['q1','q2','q3','q4','q5','q6','q7'].map((q,i)=>{const k='ds1.'+q;let extra='';
+    if(q==='q1'&&S.ch['ds1.c1']!==undefined)extra=`\n   Quick pick: ${CHOICES['ds1.c1'].o[S.ch['ds1.c1']].t}`;
+    if(q==='q2'&&S.ch['ds1.c2']!==undefined)extra=`\n   Quick pick: ${CHOICES['ds1.c2'].o[S.ch['ds1.c2']].t}`;
+    if(q==='q4')extra=`\n   Possible mothers picked: ${S.q4m.join(', ')||'none'}; possible fathers picked: ${S.q4f.join(', ')||'none'}`;
+    if(q==='q6'&&S.ch['ds1.c6']!==undefined)extra=`\n   Quick pick: ${CHOICES['ds1.c6'].o[S.ch['ds1.c6']].t}`;
+    return `${i+1}. ${P[k]}${extra}\n${A(k)}`;}).join('\n\n');
+  const ds2=['q1','q2m','q2f','q3','q4','q5','q6','q7m','q7f','q7c','q8','q9','q10'].map(q=>{const k='ds2.'+q;return `${P[k]}\n${A(k)}\n   Source: ${S.src[k]||'(none)'}`;}).join('\n\n');
+  const hunt=S.hunt.log.map(r=>`   ${PREY[r.prey].n}, ${r.n} lion(s): ${r.k} kills in 20 hunts, ${r.meat.toFixed(1)} kg meat per lion`).join('\n')||'   (no runs)';
+  const ds3=`${P['ds3.q1a']}\n   Total chromosomes: ${S.ans['ds3.q1a']||'(blank)'}; pairs: ${S.ans['ds3.q1p']||'(blank)'}\n\n${P['ds3.q2']}\n${A('ds3.q2')}\n\n${P['ds3.q3']}\n${A('ds3.q3')}`;
+  const ds4=`${P['ds4.q1']}\n${A('ds4.q1')}\n\n${P['ds4.q2']}\n${A('ds4.q2')}\n\nParentage results:\n${CUBS.map(c=>`   Cub ${c}: mother ${L(c).mother||'(not found)'}, father ${L(c).father||'(not found)'}`).join('\n')}`;
+  return `${head()}\n#3 Lulu the Lioness: Full Packet\n\n=== DATA SET 1 ===\n${ds1}\n\n=== DATA SET 2 ===\n${ds2}\n\nPride Challenge data:\n${hunt}\n${P['ds2.hunt']}\n${A('ds2.hunt')}\n\n${P['ds2.q11']}\n${A('ds2.q11')}\n\n=== DATA SET 3 ===\n${ds3}\n\n=== DATA SET 4 ===\n${ds4}\n\n=== FINAL REPORT ===\n${finalText()}`;
+}
+function renderSubmit(){
+  $('#p-submit').innerHTML=`
+  <div class="card"><h2>Turn In</h2>
+    <p>Type your answers to the Final Report into the text box in Canvas as your submission. This is an individual assignment. Keep your completed work. You will use it as a reference for the rest of the unit.</p>
+    <div class="row"><div style="flex:2;min-width:200px"><label for="in-name2">Name</label><input type="text" id="in-name2" value="${esc(S.info.name)}"></div><div style="flex:1;min-width:100px"><label for="in-hour2">Hour</label><input type="text" id="in-hour2" value="${esc(S.info.hour)}"></div><div style="flex:1;min-width:100px"><label for="in-group2">Group #</label><input type="text" id="in-group2" value="${esc(S.info.group)}"></div></div>
+    <div id="submit-warn"></div>
+    <div class="row"><button class="btn tag" id="b-copy">Copy my Final Report</button><button class="btn" id="b-dl">Download my full packet (.txt)</button><button class="btn alt" id="b-print">Print or save as PDF</button></div>
+    <div class="fb" id="copy-fb" aria-live="polite"></div>
+  </div>
+  <div class="card"><h3>Preview of what you will copy</h3><label class="sr" for="prev">Final report preview</label><textarea id="prev" rows="16" readonly></textarea></div>`;
+}
+function renderSubmitPreview(){
+  const miss=['q1','q2','q3a','q3b','q3c','q4','q5'].filter(q=>!filled('fr.'+q));
+  $('#submit-warn').innerHTML=miss.length?`<div class="fbbox hint">${miss.length} Final Report answer${miss.length>1?'s are':' is'} still blank.</div>`:'<div class="fbbox ok">All Final Report answers are filled in.</div>';
+  $('#prev').value=finalText();
+}
+function copyText(t){
+  const fb=$('#copy-fb');
+  const fallback=()=>{const ta=document.createElement('textarea');ta.value=t;document.body.appendChild(ta);ta.select();let ok=false;try{ok=document.execCommand('copy');}catch(e){}document.body.removeChild(ta);fb.innerHTML=ok?'<div class="fbbox ok">Copied. Paste it into the Canvas text box.</div>':'<div class="fbbox hint">Copy didn\u2019t work. Select the text in the preview box and copy it yourself.</div>';};
+  if(navigator.clipboard&&window.isSecureContext)navigator.clipboard.writeText(t).then(()=>{fb.innerHTML='<div class="fbbox ok">Copied. Paste it into the Canvas text box.</div>';},fallback);else fallback();
+}
+function download(){
+  const blob=new Blob([packetText()],{type:'text/plain'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);
+  a.download='Lulu_the_Lioness_'+(S.info.name||'packet').replace(/[^a-z0-9]+/gi,'_')+'.txt';document.body.appendChild(a);a.click();document.body.removeChild(a);setTimeout(()=>URL.revokeObjectURL(a.href),1000);
+}
+function printIt(){$('#printArea').innerHTML='<pre>'+esc(packetText())+'</pre>';window.print();}
+
+/* ---------- events ---------- */
+document.addEventListener('input',e=>{
+  const t=e.target;
+  if(t.matches('[data-k]')){S.ans[t.dataset.k]=t.value;save();progress();}
+  else if(t.matches('[data-src]')){S.src[t.dataset.src]=t.value;document.getElementById('srcfb-'+t.dataset.src).innerHTML=srcCheck(t.value);save();}
+  else if(t.id==='in-name'||t.id==='in-name2'){S.info.name=t.value;save();}
+  else if(t.id==='in-hour'||t.id==='in-hour2'){S.info.hour=t.value;save();}
+  else if(t.id==='in-group'||t.id==='in-group2'){S.info.group=t.value;save();}
+  else if(t.id==='ev-range'){S.ui.ev=+t.value;updateTracker();save();}
+  else if(t.id==='h-n'){S.hunt.n=+t.value;$('#h-nv').textContent=t.value;save();}
+});
+document.addEventListener('change',e=>{
+  const t=e.target;
+  if(t.matches('input[data-ch]')){S.ch[t.dataset.ch]=+t.value;document.getElementById('cfb-'+t.dataset.ch).innerHTML=choiceFb(t.dataset.ch);save();}
+  else if(t.matches('input[data-q4]')){const k=t.dataset.q4==='m'?'q4m':'q4f';S[k]=t.checked?uniq(S[k].concat(t.value)):S[k].filter(x=>x!==t.value);$('#q4-fb').innerHTML='';save();}
+  else if(t.matches('input[data-lab]')){const s=L(t.dataset.cub);const k=t.dataset.lab;s[k][t.dataset.id]=t.value;const rk=k==='m'?'mres':'fres';if(s[rk]&&s[rk][t.dataset.id])delete s[rk][t.dataset.id];renderLab();save();}
+  else if(t.matches('select[data-pred]')){L(S.ui.cub)[t.dataset.pred]=t.value;save();}
+  else if(t.id==='hl-toggle'){S.ui.hl=t.checked;renderLab();save();}
+  else if(t.matches('input[data-hpred]')){S.hunt.pred=t.dataset.hpred;save();}
+  else if(t.id==='h-prey'){S.hunt.prey=t.value;save();}
+  else if(t.id==='z-cub'||t.id==='z-loc'){renderZoom();}
+});
+document.addEventListener('click',e=>{
+  const t=e.target;
+  const tab=t.closest('[data-tab]');if(tab){showTab(tab.dataset.tab);return;}
+  const nav=t.closest('[data-nav]');if(nav){showTab(nav.dataset.nav);return;}
+  const chk=t.closest('[data-check]');if(chk){runIdeas(chk.dataset.check);return;}
+  const tile=t.closest('[data-tile]');if(tile){karyoClick(+tile.dataset.tile);return;}
+  const ct=t.closest('#cubtabs [data-cub]');if(ct){S.ui.cub=ct.dataset.cub;renderLab();save();return;}
+  if(labAct(e))return;
+  const id=t.id;
+  if(id==='ev-prev'){S.ui.ev=Math.max(0,S.ui.ev-1);updateTracker();save();}
+  else if(id==='ev-next'){S.ui.ev=Math.min(EV.length-1,S.ui.ev+1);updateTracker();save();}
+  else if(id==='q4-check')checkQ4();
+  else if(id==='h-run')runHunt();
+  else if(id==='h-exp')huntExpected();
+  else if(id==='h-clear'){S.hunt.log=[];renderHuntLog();$('#h-out').innerHTML='';save();}
+  else if(id==='k-q1c'){const a=+S.ans['ds3.q1a'],b=+S.ans['ds3.q1p'];const fb=$('#k-q1fb');
+    if(!S.ans['ds3.q1a']||!S.ans['ds3.q1p']){fb.innerHTML='<div class="fbbox hint">Enter both numbers, then check.</div>';}
+    else if(a===38&&b===19)fb.innerHTML='<div class="fbbox ok">\u2713 Correct: 38 chromosomes in 19 pairs.</div>';
+    else if(a===19&&b===38)fb.innerHTML='<div class="fbbox hint">Close. You flipped them. Count the pairs in your karyotype, then count all the individual chromosomes.</div>';
+    else fb.innerHTML='<div class="fbbox hint">Not yet. Count the pairs in your karyotype. Each pair has two chromosomes. How many chromosomes is that in all?</div>';}
+  else if(id==='b-copy')copyText(finalText());
+  else if(id==='b-dl')download();
+  else if(id==='b-print')printIt();
+  else if(id==='btn-reset'){if(confirm('Erase all your answers on this device and start over?')){try{localStorage.removeItem(STORE);}catch(x){}S=fresh();init();showTab('start');}}
+});
+document.addEventListener('keydown',e=>{
+  if(e.target.id==='ev-range')return;
+});
+
+/* ---------- init ---------- */
+function init(){
+  buildTabs();
+  $('#in-name').value=S.info.name;$('#in-hour').value=S.info.hour;$('#in-group').value=S.info.group;
+  renderDS1();renderDS2();renderDS3();renderDS4();renderFinal();renderSubmit();
+  progress();showTab(S.ui.tab||'start');
+}
+init();
+})();
+</script>
+</body>
+</html>
